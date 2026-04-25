@@ -1,0 +1,6 @@
+{
+  "name": "慢病用药小管家",
+  "description": "提供慢性病用药计划管理、预约提醒及库存预警功能，帮助患者建立从问诊到用药的闭环管理。",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
