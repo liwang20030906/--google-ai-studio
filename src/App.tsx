@@ -48,7 +48,6 @@ export default function App() {
     logout,
     trackEvent,
     patients,
-    addPatient,
     switchPatient,
     linkPatientByCode
   } = useStore();
@@ -57,8 +56,6 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMed, setEditingMed] = useState<Medication | undefined>();
   const [isAddingPatient, setIsAddingPatient] = useState(false);
-  const [addPatientMode, setAddPatientMode] = useState<'create' | 'link'>('create');
-  const [newPatientName, setNewPatientName] = useState('');
   const [linkCode, setLinkCode] = useState('');
 
   useEffect(() => {
@@ -310,20 +307,13 @@ export default function App() {
           <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
             <div className="flex items-center justify-between mb-4">
               <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">家庭守护对象</div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => { setIsAddingPatient(true); setAddPatientMode('link'); }}
-                  className="p-1 hover:bg-white/10 rounded-lg text-blue-400 transition-all title='输入编码绑定'"
-                >
-                  <RefreshCcw size={16} />
-                </button>
-                <button 
-                  onClick={() => { setIsAddingPatient(true); setAddPatientMode('create'); }}
-                  className="p-1 hover:bg-white/10 rounded-lg text-blue-400 transition-all title='直接添加'"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
+              <button 
+                onClick={() => setIsAddingPatient(true)}
+                className="p-1 hover:bg-white/10 rounded-lg text-blue-400 transition-all"
+                title="输入守护码绑定"
+              >
+                <Plus size={16} />
+              </button>
             </div>
             
             <div className="space-y-3 max-h-48 overflow-y-auto custom-scrollbar-dark">
@@ -355,70 +345,41 @@ export default function App() {
             </div>
 
             {isAddingPatient && (
-              <div className="mt-4 pt-4 border-t border-white/5">
-                {addPatientMode === 'create' ? (
-                  <>
-                    <input 
-                      autoFocus
-                      placeholder="输入老人姓名..."
-                      className="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-xs focus:border-blue-500 outline-none mb-3"
-                      value={newPatientName}
-                      onChange={e => setNewPatientName(e.target.value)}
-                    />
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => {
-                          if (newPatientName.trim()) {
-                            addPatient(newPatientName.trim());
-                            setNewPatientName('');
-                            setIsAddingPatient(false);
-                          }
-                        }}
-                        className="flex-1 py-2 bg-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest"
-                      >
-                        添加
-                      </button>
-                      <button 
-                        onClick={() => setIsAddingPatient(false)}
-                        className="flex-1 py-2 bg-white/5 rounded-lg text-[10px] font-black uppercase tracking-widest"
-                      >
-                        取消
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <input 
-                      autoFocus
-                      placeholder="输入 6 位守护码..."
-                      className="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-xs focus:border-blue-500 outline-none mb-3"
-                      value={linkCode}
-                      onChange={e => setLinkCode(e.target.value)}
-                    />
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => {
-                          try {
-                            linkPatientByCode(linkCode);
-                            setLinkCode('');
-                            setIsAddingPatient(false);
-                          } catch (e) {
-                            alert(e instanceof Error ? e.message : '绑定失败');
-                          }
-                        }}
-                        className="flex-1 py-2 bg-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest"
-                      >
-                        绑定
-                      </button>
-                      <button 
-                        onClick={() => setIsAddingPatient(false)}
-                        className="flex-1 py-2 bg-white/5 rounded-lg text-[10px] font-black uppercase tracking-widest"
-                      >
-                        取消
-                      </button>
-                    </div>
-                  </>
-                )}
+              <div className="mt-4 pt-4 border-t border-white/5 animate-in fade-in slide-in-from-top-2">
+                <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-3">输入 6 位守护码进行绑定</div>
+                <input 
+                  autoFocus
+                  placeholder="例如：888888"
+                  className="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-sm font-black tabular-nums tracking-widest focus:border-blue-500 outline-none mb-3"
+                  value={linkCode}
+                  maxLength={6}
+                  onChange={e => setLinkCode(e.target.value.replace(/\D/g, ''))}
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => {
+                      if (linkCode.length === 6) {
+                        try {
+                          linkPatientByCode(linkCode);
+                          setLinkCode('');
+                          setIsAddingPatient(false);
+                        } catch (e) {
+                          alert(e instanceof Error ? e.message : '绑定失败');
+                        }
+                      }
+                    }}
+                    className="flex-1 py-2 bg-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                    disabled={linkCode.length !== 6}
+                  >
+                    确认绑定
+                  </button>
+                  <button 
+                    onClick={() => { setIsAddingPatient(false); setLinkCode(''); }}
+                    className="flex-1 py-2 bg-white/5 rounded-lg text-[10px] font-black uppercase tracking-widest"
+                  >
+                    取消
+                  </button>
+                </div>
               </div>
             )}
             
